@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Chat - Connect with People Worldwide</title>
+    <link rel="stylesheet" href="styles.css?v=7">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-container">
+                <div class="welcome-header">
+                    <div class="logo">
+                        <i class="fas fa-globe"></i>
+                        <h1>Online Chat</h1>
+                    </div>
+                    <p>Connect with people from around the world in real-time</p>
+                </div>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>Real-time messaging</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-users"></i>
+                        <span>Global community</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure & private</span>
+                    </div>
+                </div>
+                
+                <div class="auth-buttons">
+                    <button id="guest-login" class="btn-primary">
+                        <i class="fas fa-user"></i>
+                        Continue as Guest
+                    </button>
+                    <button id="google-login" class="btn-google">
+                        <i class="fab fa-google"></i>
+                        Sign in with Google
+                    </button>
+                </div>
+                
+                <div class="info">
+                    <p><i class="fas fa-info-circle"></i> No registration required for guest access</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="screen">
+            <div class="chat-container">
+                <!-- Header -->
+                <div class="chat-header">
+                    <div class="header-left">
+                        <button id="back-btn" class="btn-back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="chat-info">
+                            <h2>Global Chat</h2>
+                            <span id="connection-status" class="status online">
+                                <i class="fas fa-circle"></i>
+                                Connected
+                            </span>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input id="search-input" type="text" placeholder="Search messages..." autocomplete="off" />
+                        </div>
+                        <div class="online-users">
+                            <i class="fas fa-users"></i>
+                            <span id="user-count">0</span> online
+                        </div>
+                        <div class="user-profile">
+                            <div id="user-avatar" class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="username">Guest</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pinned-bar" class="pinned-bar hidden"></div>
+
+                <!-- Messages Area -->
+                <div class="messages-container">
+                    <button id="load-older" class="btn-load-older">Load older</button>
+                    <div id="messages" class="messages">
+                        <!-- Messages will be inserted here -->
+                    </div>
+                    <div id="typing-indicator" class="typing-indicator hidden">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span id="typing-text">Someone is typing...</span>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-container">
+                    <div id="reply-preview" class="reply-preview hidden"></div>
+                    <form id="message-form" class="message-form">
+                        <div class="input-wrapper">
+                            <button type="button" id="emoji-btn" class="btn-icon" title="Emoji">
+                                <i class="far fa-smile"></i>
+                            </button>
+                            <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" maxlength="500">
+                            <input type="file" id="file-input" class="hidden" accept="image/*,video/*,application/pdf" tabindex="-1" aria-hidden="true" />
+                            <button type="button" id="attach-btn" class="btn-icon" title="Attach" aria-label="Attach file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button type="button" id="gif-btn" class="btn-icon" title="Add GIF via URL" aria-label="Add GIF">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <button type="submit" class="btn-send" aria-label="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <div id="emoji-picker" class="emoji-picker hidden" role="dialog" aria-label="Emoji picker">
+                        <button type="button" class="emoji-item">😀</button>
+                        <button type="button" class="emoji-item">😂</button>
+                        <button type="button" class="emoji-item">😍</button>
+                        <button type="button" class="emoji-item">👍</button>
+                        <button type="button" class="emoji-item">🔥</button>
+                        <button type="button" class="emoji-item">🎉</button>
+                        <button type="button" class="emoji-item">🙏</button>
+                        <button type="button" class="emoji-item">😢</button>
+                        <button type="button" class="emoji-item">😮</button>
+                        <button type="button" class="emoji-item">💯</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <h2>Connecting to chat...</h2>
+                <p>Please wait while we establish your connection</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=3" defer></script>
+</body>
+</html>
